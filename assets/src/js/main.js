@@ -4,9 +4,9 @@ var DefaultRoute = Router.DefaultRoute;
 var Route = Router.Route;
 var Link = Router.Link;
 var RouteHandler = Router.RouteHandler;
-var Login = require('./components/login.jsx');
-var Users = require('./components/users.jsx');
-var Signup = require('./components/signup.jsx');
+var Login = require('./components/login');
+var Users = require('./components/users');
+var Signup = require('./components/signup');
 
 var App = React.createClass({
   render: function () {
@@ -33,14 +33,15 @@ var App = React.createClass({
               </div>
             </div>
           </div>
-          <RouteHandler/>
         </div>
+
+        <RouteHandler/>
 
         <div id="footer">
           <div className={"container text-center"}>
             <div>© 2014 Company, Inc.</div>
             <div><strong>Trallocate.com</strong>.
-              Created by<a href="http://sahatyalkabov.com"> Ritesh Kumar</a>
+              Created by<a href=""> Ritesh Kumar</a>
             </div>
           </div>
         </div>
@@ -57,6 +58,6 @@ var routes = (
   </Route>
 );
 
-Router.run(routes, function (Handler) {
+Router.run(routes, Router.HistoryLocation, function (Handler) {
   React.render(<Handler/>, document.body);
 });

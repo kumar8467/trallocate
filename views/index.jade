@@ -1,5 +1,30 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+  #application
+    #wrap
+      div(navbar-inverse='')
+        div.navbar.navbar-inverse.navbar-fixed-top
+          .navbar-header
+            button.navbar-toggle(type='button', data-toggle='collapse', data-target='.navbar-collapse')
+              span.sr-only Toggle navigation             
+              span.icon-bar             
+              span.icon-bar          
+              span.icon-bar         
+            a.navbar-brand(href='#') Trallocate         
+          .navbar-collapse.collapse
+            ul.nav.navbar-nav
+              li
+                a(href=("/login")) Login
+              li
+                a(href=("/users")) Users
+              li
+                a(href=("/signup")) Signup
+      !{markup} 
+      #footer
+        .container.text-center
+          div &copy; 2014 Company, Inc.     
+          div
+            strong Trallocate.com. Created by
+            a(href='')  Ritesh Kumar
+

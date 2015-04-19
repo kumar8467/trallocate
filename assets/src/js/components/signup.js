@@ -1,5 +1,5 @@
 var React = require('react');
-var SignupForm = require('./signup_form.jsx');
+var SignupForm = require('./signup_form');
 var SignupStore = require('../stores/signup-store');
 var Router = require('react-router')
 

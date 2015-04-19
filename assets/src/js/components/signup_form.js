@@ -1,6 +1,6 @@
 var React = require('react');
-var InputField = require('./input_field.jsx');
-var InputButton = require('./button.jsx');
+var InputField = require('./input_field');
+var InputButton = require('./button');
 var SignupActions = require('../actions/signup-action');
 
 

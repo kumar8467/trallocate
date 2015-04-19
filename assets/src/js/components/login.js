@@ -1,5 +1,5 @@
 var React = require('react');
-var LoginForm = require('./login_form.jsx');
+var LoginForm = require('./login_form');
 var LoginStore = require('../stores/login-store');
 var Router = require('react-router')
 
