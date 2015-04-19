@@ -16,7 +16,6 @@ if ok
 take username add a salt timestamp and encode it 
 save the cookie in mongodb with cookiename and set ttl to expiry time
 create a object with name path domain expiry time
-
 */
 
 exports.init = function(req, res, next) {

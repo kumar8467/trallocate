@@ -14,4 +14,9 @@ router.get('/', function(req, res, next) {
 // router.post('/api/v1/authenticate', require('../scripts/user_panel_authentication').init);
 router.post('/api/v1/authenticate', require('../scripts/authentication').init);
 
+router.post('/api/v1/signup', require('../scripts/signup').init);
+
+//Email Activation api
+router.get('/activation', require('../scripts/signup').activate);
+
 module.exports = router;

@@ -13,7 +13,7 @@ var _user = {
 
 authenticateUser = function(data){
   request
-  .post('http://localhost:3001/api/v1/authenticate')
+  .post('http://localhost:3000/api/v1/authenticate')
   .send(data)
   .set('Accept', 'application/json')
   .end(function(err, res){

@@ -5,12 +5,6 @@ express = require('express');
 router = express.Router();
 var path    = require("path");
 
-/* GET home page. */
-router.post('/api/v1/signup', require('../scripts/signup').init);
-
-//Email Activation api
-router.post('/api/v1/activate', require('../scripts/signup').activate);
-
 //Authntication Api
 router.post('/api/v1/auth_user', require('../scripts/authentication').init);
 

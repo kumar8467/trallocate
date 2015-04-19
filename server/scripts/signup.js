@@ -91,7 +91,7 @@ exports.init = function(req, res, next) {
 exports.activate = function(req, res, next) {
   var activationEvent, fetchCachedData, token;
   activationEvent = new Events.EventEmitter();
-  if (!(token = req.body.activation_token)) {
+  if (!(token = req.query.token)) {
     return next(Err.status(105));
   }
   fetchCachedData = function() {
@@ -145,13 +145,7 @@ exports.activate = function(req, res, next) {
       if (err) {
         return next(Err.status(109));
       }
-      res.writeHead(200);
-      sucess_obj = {
-        status: 'success',
-        message: null,
-        data: user_info
-      };
-      return res.end(JSON.stringify(sucess_obj));
+      return res.render('signup_success');
     };
     return UserInfo.create(decrypted_data, mainResponse);
   });

@@ -5,7 +5,7 @@ var Router = require('react-router')
 
 function getLoginState() {
   return {
-    authentication_awaited: SignupStore.isAuthenticated(),
+    authentication_awaited: SignupStore.emailSent(),
     error: SignupStore.signupError()
   };
 }

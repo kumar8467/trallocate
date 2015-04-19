@@ -77,6 +77,8 @@ validate = function(data) {
 exports.isValidUsername = function(username, callback) {
   var onValidation;
   onValidation = function(err, result) {
+    console.log("valid username");
+    console.log(result);
     return callback(err, result);
   };
   return Mongo.find(collection, {

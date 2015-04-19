@@ -13,7 +13,7 @@ var _signup = {
 
 createUser = function(data){
   request
-  .post('http://localhost:3000/signup')
+  .post('http://localhost:3000/api/v1/signup')
   .send(data)
   .set('Accept', 'application/json')
   .end(function(err, res){
@@ -29,8 +29,8 @@ createUser = function(data){
 };
 
 SignupStore = assign({}, EventEmitter.prototype, {
-  isAuthenticated: function(){
-    return _signup.authenticated;
+  emailSent: function(){
+    return _signup.authentication_awaited;
   },
   signupError: function(){
     return _signup.signup_error;

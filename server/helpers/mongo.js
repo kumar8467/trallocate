@@ -7,7 +7,7 @@ Err = require('./error_handler');
 db = null;
 
 exports.connect = function() {
-  return MongoClient.connect("mongodb://localhost:27017/trallocate_dev", function(err, database) {
+  return MongoClient.connect("mongodb://localhost:27017/trallocate_development", function(err, database) {
     if (err) {
       console.log("ERROR:: Not able to connect to mongodb");
       throw err;
