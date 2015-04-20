@@ -18,7 +18,7 @@ router.get('/', function(req, res, next) {
   res.sendFile(path.join(__dirname+'../../../assets/dist/app.html'));
 });
 
-router.get('/login', function(req, res, next) {
+router.get('/signup', function(req, res, next) {
   console.log('******** in user panel ********');
   var factory = React.createFactory(SignUp);
   var markup = React.renderToString(factory());
@@ -28,12 +28,12 @@ router.get('/login', function(req, res, next) {
   });
 });
 
-router.get('/signup', function(req, res, next) {
+router.get('/login', function(req, res, next) {
   console.log('******** in user panel ********');
   var factory = React.createFactory(Login);
   var markup = React.renderToString(factory());
   return res.render('index', {
-    title: 'SignUp',
+    title: 'Login',
     markup: markup
   });
 });
@@ -43,7 +43,7 @@ router.get('/users', function(req, res, next) {
   var factory = React.createFactory(Users);
   var markup = React.renderToString(factory());
   return res.render('index', {
-    title: 'SignUp',
+    title: 'Users',
     markup: markup
   });
 });

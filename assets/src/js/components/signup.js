@@ -3,7 +3,7 @@ var SignupForm = require('./signup_form');
 var SignupStore = require('../stores/signup-store');
 var Router = require('react-router')
 
-function getLoginState() {
+var getLoginState = function() {
   return {
     authentication_awaited: SignupStore.emailSent(),
     error: SignupStore.signupError()
@@ -26,9 +26,7 @@ module.exports = React.createClass({
     },
     render: function() {
         return (
-            < div >
-                < SignupForm id = "signupForm" authentication_awaited={this.state.authentication_awaited} error={this.state.error}/>
-            < /div>
+            < SignupForm id = "signupForm" authentication_awaited={this.state.authentication_awaited} error={this.state.error}/>
         );
     },
     _onChange: function() {

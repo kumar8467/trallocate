@@ -38,24 +38,24 @@ app.use(express.static(path.join(__dirname, 'assets/dist')));
 
 app.use('/', user_panel_routes);
 
-app.all('*', function(req, res, next) {
-    console.log('******** after user panel ********');
-    console.log(req.url);
-    console.log(req.cookies);
-    var cookieName = req.cookies.cookieName;
-    var cookieExistsCallback = function(err,result){
-        console.log(result);
-        if(result.length){
-            console.log('Authenticated Client');
-            next();
-        }else{
-            console.log('Unauthenticated Client Request');
-            res.status(403);
-            res.end(JSON.stringify({error: 'Unauthorized to Access Api'}));
-        }
-    };
-    Cookies.find({cookieName: cookieName, sequence_value: null}, cookieExistsCallback);
-});
+// app.all('*', function(req, res, next) {
+//     console.log('******** after user panel ********');
+//     console.log(req.url);
+//     console.log(req.cookies);
+//     var cookieName = req.cookies.cookieName;
+//     var cookieExistsCallback = function(err,result){
+//         console.log(result);
+//         if(result.length){
+//             console.log('Authenticated Client');
+//             next();
+//         }else{
+//             console.log('Unauthenticated Client Request');
+//             res.status(403);
+//             res.end(JSON.stringify({error: 'Unauthorized to Access Api'}));
+//         }
+//     };
+//     Cookies.find({cookieName: cookieName, sequence_value: null}, cookieExistsCallback);
+// });
 
 app.use('/', api_routes);
 

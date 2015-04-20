@@ -5,13 +5,12 @@ var request = require('superagent');
 var assign = require('object-assign');
 
 var CHANGE_EVENT = 'change';
-var authenticateUser, LoginStore;
 var _signup = {
   authentication_awaited: false,
   signup_error: false,
 };
 
-createUser = function(data){
+var createUser = function(data){
   request
   .post('http://localhost:3000/api/v1/signup')
   .send(data)

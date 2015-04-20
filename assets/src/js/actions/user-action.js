@@ -1,11 +1,28 @@
-var LoginDispatcher = require('../dispatchers/login-dispatcher');
-var LoginConstants = require('../constants/login-constants');
+var UserDispatcher = require('../dispatchers/user-dispatcher');
+var UserConstants = require('../constants/user-constants');
 
 module.exports = {
-  signup: function(text) {
-    LoginDispatcher.dispatch({
-      actionType: LoginConstants.SIGNUP,
-      data: data
+  fetchUser: function() {
+    UserDispatcher.dispatch({
+      actionType    : UserConstants.FETCH_USERS,
+    });
+  },
+  editUser: function(text) {
+    UserDispatcher.dispatch({
+      actionType    : UserConstants.EDIT_USER,
+      data          : data
+    });
+  },
+  deleteUser: function(text) {
+    UserDispatcher.dispatch({
+      actionType    : UserConstants.DELETE_USER,
+      data          : data
+    });
+  },
+  showUser: function(text) {
+    UserDispatcher.dispatch({
+      actionType    : UserConstants.SHOW_USER,
+      data          : data
     });
   },
 };

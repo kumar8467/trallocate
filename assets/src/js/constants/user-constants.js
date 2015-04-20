@@ -1,0 +1,6 @@
+module.exports = {
+  FETCH_USERS : 'FETCH_USERS',
+  EDIT_USER   : 'EDIT_USER',
+  DELETE_USER : 'DELETE_USER',
+  SHOW_USER   : 'SHOW_USER'
+};
