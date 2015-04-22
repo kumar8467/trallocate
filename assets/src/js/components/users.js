@@ -7,7 +7,7 @@ var Router = require('react-router')
 function getUserState() {
   return {
      isLoaded: UserStore.isLoaded(),
-     users: UserStore.getUsers()
+     users: UserStore.findAll()
   };
 }
 var self = this;

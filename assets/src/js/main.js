@@ -6,8 +6,9 @@ var Link = Router.Link;
 var RouteHandler = Router.RouteHandler;
 var Login = require('./components/login');
 var Users = require('./components/users');
-// var ShowUsers = require('./components/show_user');
+var ShowUser = require('./components/show_user');
 var Signup = require('./components/signup');
+var EditUser = require('./components/edit_user');
 
 var App = React.createClass({
   render: function () {
@@ -54,7 +55,9 @@ var App = React.createClass({
 var routes = (
   <Route name="app" path="/" handler={App}>
     <Route name="login" handler={Login} />
-    <Route name="users" handler={Users} />
+    <Route name="users" path="/users" handler={Users} />
+      <Route name="showUser" path="users/:userId" handler={ShowUser} />
+      <Route name="editUser" path="users/:userId/edit" handler={EditUser} />
     <Route name="signup" handler={Signup} />
   </Route>
 );

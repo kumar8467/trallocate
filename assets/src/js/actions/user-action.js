@@ -7,22 +7,22 @@ module.exports = {
       actionType    : UserConstants.FETCH_USERS,
     });
   },
-  editUser: function(text) {
+  editUser: function(data) {
     UserDispatcher.dispatch({
       actionType    : UserConstants.EDIT_USER,
       data          : data
     });
   },
-  deleteUser: function(text) {
+  deleteUser: function(data) {
     UserDispatcher.dispatch({
       actionType    : UserConstants.DELETE_USER,
       data          : data
     });
   },
-  showUser: function(text) {
+  showUser: function(id) {
     UserDispatcher.dispatch({
       actionType    : UserConstants.SHOW_USER,
-      data          : data
+      id          : id
     });
   },
 };

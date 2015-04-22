@@ -64,3 +64,19 @@ body {
 .signup-success #signupForm{
   display: none;
 }
+
+.show-user .loader{
+  display: none;
+}
+
+.show-user.loading .table{
+  display: none;
+}
+
+#edit-user .loader{
+  display: none;
+}
+
+#edit-user.loading form{
+  display: none;
+}

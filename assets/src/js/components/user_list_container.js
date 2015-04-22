@@ -21,7 +21,8 @@ var UserListItem = React.createClass({
         <td>{user.active.toString()}</td>
         <td>{user.admin.toString()}</td>
         <td>
-          show | edit
+          <Link to="showUser" params={{userId: user.id}}>Show</Link>
+          <Link to="editUser" params={{userId: user.id}}>Edit</Link>
         </td>
       </tr>
     );
@@ -62,5 +63,4 @@ module.exports =  React.createClass({
 
 /*
 <Link to="edit" params={{userId: user.id}}>Edit</Link>
-<Link to="show" params={{userId: user.id}}>Show</Link>
 */
