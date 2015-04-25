@@ -11,12 +11,11 @@ var Users  = require('../../assets/dist/js/components/users')
 var ShowUser  = require('../../assets/dist/js/components/show_user')
 
 router.get('/', function(req, res, next) {
-  var markup = ""
-  // return res.render('index', {
-  //   title: 'SignUp',
-  //   markup: markup
-  // });
-  res.sendFile(path.join(__dirname+'../../../assets/dist/app.html'));
+  if(req.authenticated){
+    res.redirect('/users');
+  }else{
+    res.redirect('/login');
+  }
 });
 
 router.get('/signup', function(req, res, next) {
@@ -25,42 +24,55 @@ router.get('/signup', function(req, res, next) {
   var markup = React.renderToString(factory());
   return res.render('index', {
     title: 'SignUp',
-    markup: markup
+    markup: markup,
+    authenticated:  req.authenticated
   });
 });
 
 router.get('/login', function(req, res, next) {
   console.log('******** in user panel ********');
+  if(req.authenticated){
+    return res.redirect('/users');
+  }
   var factory = React.createFactory(Login);
   var markup = React.renderToString(factory());
   return res.render('index', {
     title: 'Login',
-    markup: markup
+    markup: markup,
+    authenticated:  req.authenticated
   });
 });
 
 router.get('/users', function(req, res, next) {
-  console.log('******** in user panel ********');
-  var factory = React.createFactory(Users);
-  var markup = React.renderToString(factory());
+  if(!req.authenticated){
+    return res.redirect('/login');
+  }
+  // var factory = React.createFactory(Users);
+  var markup = "";
   return res.render('index', {
     title: 'Users',
-    markup: markup
+    markup: markup,
+    authenticated:  req.authenticated
   });
 });
 
 router.get('/users/:userId', function(req, res, next) {
-  console.log('******** in user panel ********');
-  var factory = React.createFactory(ShowUser);
-  var markup = React.renderToString(factory());
+  if(!req.authenticated){
+    return res.redirect('/login');
+  }
+  // var factory = React.createFactory(ShowUser);
+  var markup = "";
   return res.render('index', {
     title: 'User',
-    markup: markup
+    markup: markup,
+    authenticated:  req.authenticated
   });
 });
 
 // router.post('/api/v1/authenticate', require('../scripts/user_panel_authentication').init);
-router.post('/api/v1/authenticate', require('../scripts/authentication').init);
+router.post('/api/v1/signin', require('../scripts/authentication').init);
+
+router.get('/api/v1/user-data', require('../scripts/authentication').user_data);
 
 router.post('/api/v1/signup', require('../scripts/signup').init);
 

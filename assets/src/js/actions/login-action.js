@@ -8,4 +8,14 @@ module.exports = {
       data: data
     });
   },
+  authenticate: function(){
+  	LoginDispatcher.dispatch({
+      actionType: LoginConstants.AUTHENTICATE,
+    });
+  },
+  logout: function(){
+  	LoginDispatcher.dispatch({
+      actionType: LoginConstants.LOGOUT,
+    });
+  }
 };

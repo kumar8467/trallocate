@@ -4,23 +4,29 @@ express = require('express');
 
 router = express.Router();
 var path    = require("path");
+Err = require('../helpers/error_handler');
 
 //Authntication Api
-router.post('/api/v1/auth_user', require('../scripts/authentication').init);
+router.all("*",function(req,res,next){
+    if(req.authenticated)
+        next()
+    else
+        next(Err.status(403))
+})
 
-router.post('/api/v1/forgot', require('../scripts/forgot').init);
+router.post('/forgot', require('../scripts/forgot').init);
 
-router.post('/api/v1/reset', require('../scripts/reset').init);
+router.post('/reset', require('../scripts/reset').init);
 
-router.get('/api/v1/users', require('../scripts/user').find);
+router.get('/users', require('../scripts/user').find);
 
-router.post('/api/v1/users', require('../scripts/user').find);
+router.post('/users', require('../scripts/user').find);
 
-router.get('/api/v1/users/:id', require('../scripts/user').get);
+router.get('/users/:id', require('../scripts/user').get);
 
-router.put('/api/v1/users/:id', require('../scripts/user').put);
+router.put('/users/:id', require('../scripts/user').put);
 
-router["delete"]('/api/v1/users/:id', require('../scripts/user')["delete"]);
+router["delete"]('/users/:id', require('../scripts/user')["delete"]);
 
 //User Panel
 

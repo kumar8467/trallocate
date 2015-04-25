@@ -9,9 +9,54 @@ var Users = require('./components/users');
 var ShowUser = require('./components/show_user');
 var Signup = require('./components/signup');
 var EditUser = require('./components/edit_user');
+var LoginStore = require('./stores/login-store');
+var LoginAction = require('./actions/login-action');
 
+var getLoginState = function(){
+  return { 
+    authenticated: LoginStore.isAuthenticated(),
+    authInProcess: LoginStore.authInProcess()
+  };
+}
 var App = React.createClass({
+  contextTypes: {
+    router: React.PropTypes.func
+  },
+  getInitialState: function(){
+    LoginAction.authenticate();
+    return getLoginState()
+  },
+  _onChange: function() {
+    this.setState(getLoginState());
+  },
+  _onLogoutClick: function(){
+    LoginAction.logout()
+  },
+  _onLogout: function(){
+    document.cookie = "";
+    this.context.router.transitionTo('/login')
+    this.setState(getLoginState());
+  },
+  componentDidMount: function() {
+    LoginStore.addChangeListener(this._onChange);
+    LoginStore.addLogoutListener(this._onLogout);
+  },
+
+  componentWillUnmount: function() {
+    LoginStore.removeChangeListener(this._onChange);
+    LoginStore.removeLogoutListener(this._onLogout);
+  },
   render: function () {
+    var panel = [];
+    if(!this.state.authInProcess){
+      if(this.state.authenticated){
+        panel.push(<li><Link to="users">Users</Link></li>)
+        panel.push(<li><a class="" href="" onClick={this._onLogoutClick}>Logout</a></li>)
+      }else{
+        panel.push(<li><Link to="login">Login</Link></li>)
+        panel.push(<li><Link to="signup">Signup</Link></li>)
+      }
+    }
     return (
       <div id="application">
         <div id="wrap">
@@ -28,9 +73,7 @@ var App = React.createClass({
               </div>
               <div className={"navbar-collapse collapse"}>
                 <ul className={"nav navbar-nav"}>
-                  <li><Link to="users">Users</Link></li>
-                  <li><Link to="login">Login</Link></li>
-                  <li><Link to="signup">Signup</Link></li>
+                  {panel}
                 </ul>
               </div>
             </div>

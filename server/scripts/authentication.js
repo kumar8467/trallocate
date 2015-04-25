@@ -18,6 +18,15 @@ save the cookie in mongodb with cookiename and set ttl to expiry time
 create a object with name path domain expiry time
 */
 
+exports.user_data = function(req, res, next){
+  var responsed = {}
+  if(req.authenticated){
+    var response = {session: true};
+  }else{
+    response = {session: false};
+  }
+  res.end(JSON.stringify(response))
+}
 exports.init = function(req, res, next) {
   console.log(req.body);
   if(req.body.username && req.body.password){
@@ -56,7 +65,7 @@ exports.init = function(req, res, next) {
           console.log(err);
           return next(Err.status(403));
         }
-        res.cookie('cookieName',cookie , { maxAge: 900000, httpOnly: true});
+        res.cookie('cookieName',cookie , { maxAge: 900000, httpOnly: false});
         return res.end(JSON.stringify(userdata));
       };
       Cookie.create({cookieName: cookie},setCookieCallback);

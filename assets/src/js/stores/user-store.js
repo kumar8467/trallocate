@@ -4,6 +4,7 @@ var UsersConstants = require('../constants/user-constants');
 var request = require('superagent');
 var assign = require('object-assign');
 var Promise = require('promise');
+var LoginStore = require('./login-store')
 
 var UsersStore;
 var CHANGE_EVENT = 'change';
@@ -22,8 +23,10 @@ var fetchUsers = function(){
     .end(function(err, res){
       var parsed_res = JSON.parse(res.text);
       if(err){
+        LoginStore.setAuthentication(false);
         reject(err)
       }else{
+        LoginStore.setAuthentication(true);
         _users.users = parsed_res.users;
         resolve(parsed_res)
       }
@@ -32,7 +35,7 @@ var fetchUsers = function(){
 };
 
 var getUserById= function(id){
-  if(id && _users.isLoaded && _users.users && _users.users.length && !isNaN(id)){
+  if(id && _users.users && _users.users.length && !isNaN(id)){
     var users = _users.users
     for(var i=0; i < users.length; i++){
       if(users[i].id == id){
@@ -55,7 +58,7 @@ var loadingCompleted = function(){
 }
 
 var set = function(id,data){
-  if(id && _users.isLoaded && _users.users && _users.users.length && !isNaN(id)){
+  if(id && data){
     var users = _users.users;
     var user_found = false;
     for(var i=0; i < _users.users.length; i++){

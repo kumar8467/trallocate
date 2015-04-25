@@ -33,27 +33,26 @@ module.exports =  React.createClass({
   render:function(){
     var users = this.props.users;
     var users_list = [];
+    if(!this.props.isLoaded){
+      return <h1> Loading...</h1>;
+    }
     if(!(users && users.length)){
       users_list.push(<NoUserFound />)
-    }else{
-      for (var i=0; i < users.length; i++) {
-        users_list.push(<UserListItem user={users[i]} />);
-      }
     }
     return (
       <div className="container">
         <h2>Users</h2>
         <table className="table table-bordered table-striped">
           <thead>
-          <th>Id</th>
-          <th>Username</th>
-          <th>Email</th>
-          <th>Active</th>
-          <th>Admin</th>
-          <th>Actions</th>
+            <th>Id</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Active</th>
+            <th>Admin</th>
+            <th>Actions</th>
           </thead>
           <tbody>
-            {users_list}
+            {users.map(function(user){return <UserListItem user={user} />})}
           </tbody>
         </table>
       </div>

@@ -13,12 +13,14 @@ module.exports = React.createClass({
     contextTypes: {
         router: React.PropTypes.func
     },
-    getInitialState: function() {
+    getIdFromParams: function(){
       var params = this.context.router.getCurrentParams();
-      var id = parseInt(params.userId);
-      var current_state = getUserState(id);
+      return parseInt(params.userId);
+    },
+    getInitialState: function() {
+      var current_state = getUserState(this.getIdFromParams());
       if(!current_state.isLoaded)
-        UserActions.showUser(id)
+        UserActions.showUser(current_state.user_id)
       return current_state
     },
     componentDidMount: function() {
@@ -30,6 +32,8 @@ module.exports = React.createClass({
     },
     render:function(){
       var user = this.state.user;
+      if(!user)
+        return <h1>Loading...</h1>
       return (
         <div className={this.state.user ? "show-user container" : "show-user container loading"}>
           <h2>User</h2>
@@ -74,7 +78,7 @@ module.exports = React.createClass({
       );
     },
     _onChange: function() {
-      this.setState(getUserState());
+      this.setState(getUserState(this.state.user_id));
     }
 });
 

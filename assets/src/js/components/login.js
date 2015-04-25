@@ -14,7 +14,10 @@ module.exports = React.createClass({
         router: React.PropTypes.func
     },
     getInitialState: function() {
-      return getLoginState()
+        var state = getLoginState()
+        if(state.authenticated)
+            this.context.router.transitionTo('/users')
+        return state
     },
     componentDidMount: function() {
         LoginStore.addChangeListener(this._onChange);
@@ -25,9 +28,7 @@ module.exports = React.createClass({
     },
     render: function() {
         return ( 
-            < div >
-                < LoginForm id = "loginForm" authenticated={this.state.authenticated}/> 
-            < /div>
+            < LoginForm id = "loginForm" authenticated={this.state.authenticated}/> 
         );
     },
     _onChange: function() {
