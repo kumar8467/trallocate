@@ -2,6 +2,7 @@ var Mongo = require('../helpers/mongo');
 var Crypt = require('../helpers/crypt');
 var Err = require('../helpers/error_handler');
 var collection = 'Cookies';
+var Promise = require('promise');
 
 var model = function() {
   return {
@@ -66,12 +67,17 @@ exports.create = function(data) {
 	});
 };
 
-exports.remove = function(query, callback) {
-  return Mongo.update(collection, query, {
-    $set: {
-      active: false
-    }
-  }, callback);
+exports.remove = function(query) {
+	return new Promise(function(resolve,reject){
+		var success = function(result){
+			return resolve(result);
+		};
+		var failed = function(err){
+			return reject(err);
+		}
+		return Mongo.update(collection, query, {$set: {active: false}})
+		.then(success, fail)
+	});
 };
 
 exports.find = function(query) {
@@ -82,10 +88,10 @@ exports.find = function(query) {
   	var success = function(result){
   		return resolve(result)
   	};
-  	var fail = function(err){
+  	var failed = function(err){
   		return reject(err);
   	}
   	return Mongo.find(collection, query, hidden_fields)
-  	.then(success,fail);
+  	.then(success,failed);
 	});
 };

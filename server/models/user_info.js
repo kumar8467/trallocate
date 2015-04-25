@@ -75,9 +75,9 @@ validate = function(data) {
   };
 };
 
-exports.isValidUsername = function(username, callback) {
+exports.isValidUsername = function(username) {
 	return new Promise(function(resolve,reject){
-		var validUsername = function(result){
+		var success = function(result){
 			console.log("SUCCESS :: Valid Username");
 	  	if(result.length === 0){
 	  		return reject();	
@@ -85,84 +85,165 @@ exports.isValidUsername = function(username, callback) {
 	  		return resolve(result);	
 	  	}
 		};
-		var invalidUsername = function(err){
+		var failed = function(err){
 			console.log("ERROR :: Invalid Username");
 			return reject();	
 		};
-	  return Mongo.find(collection, {username: username}, hidden_fields)
-	  .then(validUsername,invalidUsername)
+	  	return Mongo.find(collection, {username: username}, hidden_fields)
+	  	.then(success,failed)
 	});
 };
 
-exports.isValidEmail = function(email, callback) {
-  var onValidation;
-  onValidation = function(err, result) {
-    return callback(err, result.length);
-  };
-  return Mongo.find(collection, {
-    email: email
-  }, hidden_fields, onValidation);
+exports.isValidEmail = function(email) {
+	return new Promise(function(resolve,reject){
+		var success = function(result){
+  		if(result && result.length){
+  			console.log("SUCCESS :: Valid Email")
+	  		return resolve(result);
+	  	}else{
+	  		console.log("ERROR :: InValid Email - Already Taken")
+	  		return reject(result);
+	  	}
+	  };
+	  var failed = function(err){
+	  	console.log("ERROR :: InValid Email")
+	  	return reject(err);
+	  };
+	  return Mongo.find(collection, {email: email}, hidden_fields)
+	  .then(success, failed);
+	});
 };
 
-exports.create = function(data, callback) {
-  var userCreatedCallback, user_record, valid;
-  if ((valid = validate(data)).error) {
-    return callback(Err.status(110, 409, valid.message));
-  }
-  user_record = getNewRecord(data);
-  userCreatedCallback = function(err, result) {
-    var sendUserInfo;
-    if (err && !(result && result.ops && result.ops[0] && result.ops[0].id)) {
-      return callback(Err.status(111));
-    }
-    user_record.user_id = result.ops[0].id;
-    user_record.password = data.password;
-    sendUserInfo = function(err, result) {
-      if (err) {
-        return callback(err, result);
-      }
-      if (user_record.password) {
-        delete user_record.password;
-      }
-      return callback(err, result, user_record);
-    };
-    return User.create(user_record, sendUserInfo);
-  };
-  return Mongo.create(collection, user_record, userCreatedCallback);
+
+exports.isUsernameAvailable = function(username) {
+	return new Promise(function(resolve,reject){
+		var success = function(result){
+			console.log("SUCCESS :: Valid Username");
+	  	if(result.length === 0){
+	  		console.log("SUCCESS: Username available")
+	  		return resolve();	
+	  	}else{
+	  		console.log("ERROR: Username already taken");
+	  		return reject();	
+	  	}
+		};
+		var failed = function(err){
+			console.log("ERROR :: Error while checking username availablily");
+			return reject();	
+		};
+	  Mongo.find(collection, {username: username}, hidden_fields)
+	  .then(success,failed)
+	});
 };
 
-exports.remove = function(query, callback) {
-  return Mongo.update(collection, query, {
-    $set: {
-      active: false
-    }
-  }, callback);
+exports.isEmailAvailable = function(email) {
+	return new Promise(function(resolve,reject){
+		var success = function(result){
+			if(result && result.length){
+				console.log("ERROR: Email already taken")
+				return reject();
+			}else{
+				console.log("SUCCESS :: Email available")
+				return resolve();
+			};
+		};
+	  var failed = function(err){
+	  	console.log("ERROR :: Error while checking email availablily");
+	  	return reject(err);
+	  };
+	  Mongo.find(collection, {email: email}, hidden_fields)
+	  .then(success, failed);
+	});
 };
 
-exports.find = function(query, callback) {
-  if (query === null) {
-    query = {};
-  }
-  return Mongo.find(collection, query, hidden_fields, callback);
+exports.create = function(data) {
+	return new Promise(function(resolve,reject){
+		var user_record = getNewRecord(data);
+		console.log("CREATE:: Creating User record for data = " + JSON.stringify(data));
+		var userInfoSuccess = function(result){
+			if (!(result && result.ops && result.ops[0] && result.ops[0].id)) {
+	     	console.log("ERROR:: Creating Userinfo record");
+	      return reject(Err.status(111));
+	    }
+	    console.log("SUCCESS:: Creating Userinfo record created");
+	    user_record.user_id = result.ops[0].id;
+	    user_record.password = data.password;
+	    return User.create(user_record);
+	  };
+	  var userSuccess = function(result){
+	  	console.log("SUCCESS:: Creating User record created");
+	  	if (user_record.password) {
+	      delete user_record.password;
+	    }
+	    return resolve(user_record)
+	  };
+	  var failed = function(err){
+	  	console.log("ERROR:: Creating Userinfo record");
+	  	return reject(err)
+	  };
+	  var valid
+	  if ((valid = validate(data)).error) {
+	  	return failed(Err.status(110, 409, valid.message))
+	  }
+  	Mongo.create(collection, user_record)
+  	.then(userInfoSuccess,failed)
+  	.then(userSuccess,failed);
+	})
 };
 
-exports.get = function(query, callback) {
-  var getUserCallback;
-  getUserCallback = function(err, result) {
-    if (err) {
-      return callback(err, result);
-    }
-    if (result.length >= 1) {
-      result = result[0];
-    }
-    return callback(err, result);
-  };
-  return Mongo.find(collection, query, hidden_fields, getUserCallback);
+exports.remove = function(query) {
+	return new Promise(function(resolve,reject){
+		var success = function(result){
+	  	return resolve(result);
+	  };
+	  var failed = function(err){
+	  	return reject(err);
+	  };
+		Mongo.update(collection, query, {$set: {active: false}}).then(success,failed);
+	})
 };
 
-exports.update = function(query, updated_data, callback) {
-  updated_data = map_data(updated_data);
-  return Mongo.update(collection, query, {
-    $set: updated_data
-  }, callback);
+exports.find = function(query) {
+	return new Promise(function(resolve,reject){
+		if (query === null) {
+	    query = {};
+	  }
+	  var success = function(result){
+	  	return resolve(result);
+	  };
+	  var failed = function(err){
+	  	return reject(err);
+	  };
+	  Mongo.find(collection, query, hidden_fields).then(success,failed);
+	})
+};
+
+exports.get = function(query) {
+	return new Promise(function(resolve,reject){
+		var success = function(result){
+			if (result && result.length) {
+	      result = result[0];
+	      return resolve(result);
+	    }else{
+	    	return reject(err)
+	    }
+	  };
+	  var failed = function(err){
+	  	return reject(err);
+	  };
+	  Mongo.find(collection, query, hidden_fields).then(success,failed);
+	})
+};
+
+exports.update = function(query, updated_data) {
+	return new Promise(function(resolve,reject){
+		updated_data = map_data(updated_data);
+		var success = function(result){
+	  	return resolve(result);
+	  };
+	  var failed = function(err){
+	  	return reject(err);
+	  };
+	  return Mongo.update(collection, query, {$set: updated_data}).then(success,failed);
+	})
 };

@@ -52,7 +52,7 @@ var validate = function(data) {
   };
 };
 
-exports.create = function(data, callback) {
+exports.create = function(data) {
 	console.log("Creating User where data = " + JSON.stringify(data));
 	return new Promise(function(resolve, reject){
 		var user_record, valid;
@@ -60,8 +60,15 @@ exports.create = function(data, callback) {
 	  	console.log("ERROR :: Creating User where data = " + JSON.stringify(data));
 	  	return reject()
 	  }
+	  var success = function(result){
+	  	return resolve(result);
+	  };
+	  var failed = function(err){
+	  	return reject(err);
+	  };
 	  user_record = getNewRecord(data);
-	  return Mongo.create(collection, user_record, callback);
+	  return Mongo.create(collection, user_record)
+	  .then(success,failed);
 	});
 };
 

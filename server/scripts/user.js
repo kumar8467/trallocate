@@ -48,15 +48,14 @@ exports.get = function(req, res, next) {
   if (!(req.params && (id = req.params.id) && /^[1-9][0-9]*$/.test(id))) {
     return next(Err.status(100, 404, "User not found"));
   }
-  getCallback = function(err, result) {
-    if (err) {
-      return next(err);
-    }
-    return res.send(JSON.stringify({user: result}));
+  var success = function(result){
+  	return res.send(JSON.stringify({user: result}));
   };
-  return UserInfo.get({
-    id: parseInt(id,10)
-  }, getCallback);
+  var failed = function(err){
+  	return next(err);
+  };
+  return UserInfo.get({id: parseInt(id,10)})
+  .then(success, failed);
 };
 
 
@@ -76,17 +75,16 @@ exports.find = function(req, res, next) {
     if (err) {
       return next(err);
     }
-    findCallback = function(final_err, final_result) {
-      if (final_err) {
-        return next(final_err);
-      }
-      res.setHeader('Content-Type', 'application/json');
+    var success = function(final_result){
+  		res.setHeader('Content-Type', 'application/json');
       return res.end(JSON.stringify({users: final_result}));
-    };
-    return UserInfo.find(result, findCallback);
+	  };
+	  var failed = function(err){
+	  	return next(err);
+	  };
+    return UserInfo.find(result).then(success, failed);;
   };
   query = parseQuery(req.query, queryCallback);
-  return;
 };
 
 exports.put = function(req, res, next) {
@@ -94,29 +92,25 @@ exports.put = function(req, res, next) {
   if (!(req.body && req.body.user && (id = req.params.id) && /^[1-9][0-9]*$/.test(id))) {
     return next(Err.status(100, 404, "Incorrect data Data"));
   }
-  updateCallback = function(err, result) {
-    if (err) {
-      return next(err);
-    }
-    return res.send(JSON.stringify(result));
+  var success = function(result){
+		return res.send(JSON.stringify(result));
   };
-  return UserInfo.update({
-    id: parseInt(id,10)
-  }, req.body.user, updateCallback);
+  var failed = function(err){
+  	return next(err);
+  };
+  return UserInfo.update({id: parseInt(id,10)}, req.body.user).then(success, failed);
 };
 
 exports["delete"] = function(req, res, next) {
   var id, updateCallback;
   if (!(req.body && (id = req.params.id) && /^[1-9][0-9]*$/.test(id))) {
     return next(Err.status(100, 404, "Incorrect data Data"));
-  }
-  updateCallback = function(err, result) {
-    if (err) {
-      return next(err);
-    }
-    return res.send(JSON.stringify(result));
   };
-  return UserInfo.update({
-    id: parseInt(id,10)
-  }, req.body, updateCallback);
+  var success = function(result){
+		return res.send(JSON.stringify(result));
+  };
+  var failed = function(err){
+  	return next(err);
+  };
+  return UserInfo.update({id: parseInt(id,10)}, req.body).then(success, failed);
 };

@@ -32,7 +32,7 @@ getCollection = function(db, collection_name) {
 };
 
 exports.create = function(collection_name, record) {
-	console.log("CREATE :: Creating records for " + collection_name + "where data = " + JSON.stringify(record))
+	console.log("CREATE :: Creating records for " + collection_name + " where data = " + JSON.stringify(record))
 	return new Promise(function(resolve, reject){
 		var collection, getSequenceCallback;
 	  if (!db) {
@@ -83,7 +83,7 @@ exports.remove = function(collection_name, query) {
 	    console.log("ERROR: Query not found")
 	  	return reject();
 	  }
-	  console.log("DELETE :: Removing records for " + collection_name + "where query = " + JSON.stringify(query))
+	  console.log("DELETE :: Removing records for " + collection_name + " where query = " + JSON.stringify(query))
 	  collection = getCollection(db, collection_name);
 	  if (!collection) {
 	    console.log("ERROR: Collection not found")
@@ -103,7 +103,7 @@ exports.remove = function(collection_name, query) {
 
 
 exports.find = function(collection_name, query, hidden_fields) {
-	console.log("QUERY :: Finding records for " + collection_name + "where query = " + JSON.stringify(query));
+	console.log("QUERY :: Finding records for " + collection_name + " where query = " + JSON.stringify(query));
 	return new Promise(function(resolve, reject){
 		var collection;
 	  if (query == null) {

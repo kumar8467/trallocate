@@ -5,7 +5,6 @@ Emailer = require('../helpers/emailer');
 Crypt = require('../helpers/crypt');
 Cache = require('../helpers/memory_cache');
 UserInfo = require('../models/user_info');
-Events = require("events");
 Err = require('../helpers/error_handler');
 secret_salt = 'trellocate_secret_mission';
 
@@ -17,69 +16,67 @@ getHtml = function(user_activation_hash) {
   return text;
 };
 
-setUserInfoInCache = function(user_activation_hash, user_info, sendEmail) {
+setUserInfoInCache = function(user_activation_hash, user_info) {
   var encrypted_user_info;
-  if (!(user_info.username && user_info.password && user_info.email)) {
-    return sendEmail(Err.status(101));
-  }
   user_info = JSON.stringify(user_info);
   encrypted_user_info = Crypt.encrypt(user_info, secret_salt);
-  return Cache.set(user_activation_hash, encrypted_user_info, sendEmail);
+  return Cache.set(user_activation_hash, encrypted_user_info);
 };
 
 exports.init = function(req, res, next) {
-  var duplicateUsernameCheckCallback, emailid, obj, signupEvent, user_info;
   if (req.body.email) {
-    emailid = req.body.email;
-    signupEvent = new Events.EventEmitter();
-    user_info = req.body;
-    duplicateUsernameCheckCallback = function(err, result) {
-      if (result && result.length) {
-        return next(Err.status(102));
-      }
-      return signupEvent.emit("duplicateEmailCheck", user_info);
+  	var user_activation_hash;
+  	var user_info = req.body;
+    var authFail = function(err){
+      return new Promise(function(resolve, reject){
+        return reject(err);
+      });
     };
-    UserInfo.isValidUsername(user_info.username, duplicateUsernameCheckCallback);
-    signupEvent.on('duplicateEmailCheck', function(user_info) {
-      var duplicateEmailCheckCallback;
-      duplicateEmailCheckCallback = function(err, result) {
-        if (result) {
-          return next(Err.status(103));
-        }
-        return signupEvent.emit("fireActivationEmail", user_info);
-      };
-      return UserInfo.isValidEmail(user_info.email, duplicateEmailCheckCallback);
-    });
-    return signupEvent.on('fireActivationEmail', function(user_info) {
-      var sendEmail, sucess_obj, user_activation_hash;
+    var authFailResponse = function(err){
+      console.log("ERROR :: Error in signup process")
+      return next(err);
+    };
+    var authUserSuccess = function(result){
+      return UserInfo.isEmailAvailable(user_info.email);
+    }
+    var authEmailSuccess = function(result){
       user_activation_hash = Crypt.getRandomHash();
       console.log('User key:  ' + user_activation_hash);
-      sendEmail = function(error) {
-        var mailOptions;
-        if (error) {
-          return next(Err.status(104));
-        }
-        if (user_activation_hash) {
-          mailOptions = {
-            from: 'testing8467@gmail.com',
-            to: emailid,
-            subject: 'Trallocate Email Verification',
-            text: 'Trallocate Email Verification',
-            html: getHtml(user_activation_hash)
-          };
-          return Emailer.sendEmail(mailOptions);
-        } else {
-          return next(Err.status(108));
-        }
-      };
-      setUserInfoInCache(user_activation_hash, user_info, sendEmail);
-      sucess_obj = {
-        status: 'success',
-        message: null,
-        data: null
-      };
-      return res.end(JSON.stringify(sucess_obj));
-    });
+      if (!(user_info.username && user_info.password && user_info.email)) {
+		    return next(Err.status(101));
+		  }
+      return setUserInfoInCache(user_activation_hash, user_info);
+    }
+
+    var userCacheSavedSuccess = function(){
+    	console.log("Preparing to send email")
+      var mailOptions;
+      if (user_activation_hash) {
+        mailOptions = {
+          from: 'testing8467@gmail.com',
+          to: user_info.email,
+          subject: 'Trallocate Email Verification',
+          text: 'Trallocate Email Verification',
+          html: getHtml(user_activation_hash)
+        };
+        console.log("Sending Email now")
+        Emailer.sendEmail(mailOptions);
+	      sucess_obj = {
+	        status: 'success',
+	        message: null,
+	        data: null
+	      };
+	      console.log("Sending response")
+	      return res.end(JSON.stringify(sucess_obj));
+      } else {
+        return next(Err.status(108));
+      }
+    }
+
+    UserInfo.isUsernameAvailable(user_info.username)
+    .then(authUserSuccess,authFail)
+    .then(authEmailSuccess,authFail)
+    .then(userCacheSavedSuccess, authFailResponse)
   } else {
     obj = {
       response: false
@@ -89,66 +86,46 @@ exports.init = function(req, res, next) {
 };
 
 exports.activate = function(req, res, next) {
-  var activationEvent, fetchCachedData, token;
-  activationEvent = new Events.EventEmitter();
   if (!(token = req.query.token)) {
     return next(Err.status(105));
   }
-  fetchCachedData = function() {
-    var createRecord;
-    createRecord = function(err, result) {
-      console.log("cache data fetched");
-      console.log(result);
-      var decrypted_data, decrypted_data_string;
-      if (err) {
-        return next(Err.status(106));
-      } else if (result) {
-        decrypted_data_string = Crypt.decrypt(result, secret_salt);
-        if (decrypted_data_string) {
-          decrypted_data = JSON.parse(decrypted_data_string);
-        }
-        return activationEvent.emit("duplicateUsernameCheck", decrypted_data);
-      } else {
-        return next(Err.status(107));
-      }
-    };
-    return Cache.get(token, createRecord);
+  var authFail = function(err){
+    return new Promise(function(resolve, reject){
+      return reject(err);
+    });
   };
-  activationEvent.on('duplicateUsernameCheck', function(decrypted_data) {
-    var duplicateUsernameCheckCallback;
-    duplicateUsernameCheckCallback = function(err, result) {
-      console.log("Username check");
-      console.log(result);
-      if (result && result.length) {
-        return next(Err.status(102));
-      }
-      return activationEvent.emit("duplicateEmailCheck", decrypted_data);
-    };
-    return UserInfo.isValidUsername(decrypted_data.username, duplicateUsernameCheckCallback);
-  });
-  activationEvent.on('duplicateEmailCheck', function(decrypted_data) {
-    var duplicateEmailCheckCallback;
-    duplicateEmailCheckCallback = function(err, result) {
-      console.log("Email check");
-      console.log(result);
-      if (result) {
-        return next(Err.status(103));
-      }
-      return activationEvent.emit("createUserAccount", decrypted_data);
-    };
-    return UserInfo.isValidEmail(decrypted_data.email, duplicateEmailCheckCallback);
-  });
-  activationEvent.on('createUserAccount', function(decrypted_data) {
-    var mainResponse;
-    mainResponse = function(err, result, user_info) {
-      var sucess_obj;
-      if (err) {
-        return next(Err.status(109));
-      }
-      return res.render('signup_success');
-    };
-    return UserInfo.create(decrypted_data, mainResponse);
-  });
-  return fetchCachedData();
+  var authFailResponse = function(err){
+    console.log("ERROR :: Error in signup process")
+    return  res.render('signup_error');
+  };
+  var decrypted_data;
+  var cacheFetchedSuccess = function(result){
+    console.log("cache data fetched");
+    console.log(result);
+    decrypted_data_string = Crypt.decrypt(result, secret_salt);
+    if (decrypted_data_string) {
+    	console.log("fetched user data from cache :: " + decrypted_data_string)
+      decrypted_data = JSON.parse(decrypted_data_string);
+    }
+    return UserInfo.isUsernameAvailable(decrypted_data.username)
+  };
+
+  var authUserSuccess = function(result){
+  	return UserInfo.isEmailAvailable(decrypted_data.email);
+  };
+
+  var authEmailSuccess = function(){
+  	return UserInfo.create(decrypted_data);
+  };
+
+  var userCreatedSuccess = function(result){
+    return res.render('signup_success');
+  };
+  
+  Cache.get(token)
+  .then(cacheFetchedSuccess,authFail)
+  .then(authUserSuccess,authFail)
+  .then(authEmailSuccess,authFail)
+  .then(userCreatedSuccess, authFailResponse)
 };
 
