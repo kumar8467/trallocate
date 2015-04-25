@@ -29,47 +29,46 @@ exports.user_data = function(req, res, next){
 }
 exports.init = function(req, res, next) {
   console.log(req.body);
+  var userdata = {};
+  var cookie = Crypt.encrypt(Date.now().toString(), '');
   if(req.body.username && req.body.password){
-    authenticationEvent = new Events.EventEmitter();
-    var authenticateUsernameCheckCallback;
-    
-    authenticateUsernameCheckCallback = function(err, result) {
-      if (err || result.length === 0) {
-        return next(Err.status(403));
+    var authFail = function(err){
+      return new Promise(function(resolve, reject){
+        return reject(err);
+      });
+    }
+    var authUserSuccess = function(result){
+      console.log("SUCCESS :: Username Authenticated")
+      userdata = result[0];
+      return User.get(userdata.id);
+    }
+    var authPasswordSuccess = function(result){
+      var decrypt_password = Crypt.decrypt(result[0].password, result[0].createdAt);
+      if(decrypt_password == req.body.password){
+        console.log("SUCCESS :: Password Matched")
+        return Cookie.create({cookieName: cookie});
+      }else{
+        console.log("ERROR :: Password Mismatching")
+        return authFail(Err.status(403));
       }
-      return authenticationEvent.emit("authenticatePassword", result[0]);
+    }
+    var setCookieSuccess = function(result){
+      console.log("SUCCESS :: Cookie saved to database")
+      res.cookie('cookieName',cookie , { maxAge: 900000, httpOnly: false});
+      return res.end(JSON.stringify(userdata));
+    };
+    var authFailResponse = function(err){
+      console.log("ERROR :: Error in signup process")
+      return next(err);
     };
 
-    authenticationEvent.on('authenticatePassword', function(userdata) {
-      var authenticatePasswordCheckCallback;
-      authenticatePasswordCheckCallback = function(err, result) {
-        console.log(result);
-        if (err || result.length === 0) {
-          return next(Err.status(403));
-        }
-        var decrypt_password = Crypt.decrypt(result[0].password, result[0].createdAt);
-        console.log(decrypt_password);
-        if(decrypt_password == req.body.password){
-          return authenticationEvent.emit("saveCookie", userdata);
-        }else{
-          return next(Err.status(403));
-        }
-      };
-      User.get(userdata.id, authenticatePasswordCheckCallback);
-    });
+    UserInfo.isValidUsername(req.body.username)
+    .then(authUserSuccess,authFail)
+    .then(authPasswordSuccess,authFail)
+    .then(setCookieSuccess,authFailResponse)
 
-    authenticationEvent.on('saveCookie', function(userdata){
-      var cookie = Crypt.encrypt(Date.now().toString(), '');
-      var setCookieCallback = function(err, result){
-        if(err){
-          console.log(err);
-          return next(Err.status(403));
-        }
-        res.cookie('cookieName',cookie , { maxAge: 900000, httpOnly: false});
-        return res.end(JSON.stringify(userdata));
-      };
-      Cookie.create({cookieName: cookie},setCookieCallback);
-    });
-    return UserInfo.isValidUsername(req.body.username, authenticateUsernameCheckCallback);
+  }else{
+    console.log("ERROR:: Username or Password Missing");
+    return next(Err.status(403));
   }
 };

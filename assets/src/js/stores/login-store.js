@@ -9,7 +9,7 @@ var LOGOUT_EVENT = 'logout';
 var authenticateUser, LoginStore;
 var _admin_user = {
   authenticated: false,
-  user_data: {},
+  data: {},
   authentication_awaited: true
 };
 
@@ -22,14 +22,14 @@ var login_user = function(data){
   .end(function(err, res){
     if(res.status == 200){
       _admin_user.authenticated = true;
-      _admin_user.user_data = JSON.parse(res.text);
+      _admin_user.data = JSON.parse(res.text);
       _admin_user.authentication_awaited = false;
     }
     LoginStore.emitChange();
   });
 };
 
-var user_data = function(data){
+var data = function(data){
   request
   .get('http://localhost:3000/api/v1/user-data')
   .set('Accept', 'application/json')
@@ -49,7 +49,7 @@ var user_data = function(data){
 var logout = function(){
   document.cookie = 'cookieName=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
   _admin_user.authenticated = false
-  _admin_user.user_data = {}
+  _admin_user.data = {}
   _admin_user.authentication_awaited = true
 }
 
@@ -95,7 +95,7 @@ LoginDispatcher.register(function(action) {
       break;
 
     case LoginConstants.AUTHENTICATE:
-      user_data();
+      data();
       break;
 
     case LoginConstants.LOGIN_FAIL:

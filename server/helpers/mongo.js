@@ -31,82 +31,130 @@ getCollection = function(db, collection_name) {
   return collection;
 };
 
-exports.create = function(collection_name, record, callback) {
-  var collection, getSequenceCallback;
-  if (!db) {
-    return callback(Err.status(112));
-  }
-  collection = getCollection(db, collection_name);
-  if (!collection) {
-    return callback(Err.status(113));
-  }
-  getSequenceCallback = function(err, result) {
-    if (err) {
-      return callback(err, result);
-    }
-    record.id = result.value.sequence_value;
-    return collection.insert(record, function(err, result) {
-      return callback(err, result);
-    });
-  };
-  return collection.findAndModify({
-    id: collection_name
-  }, [['id', 1]], {
-    $inc: {
-      sequence_value: 1
-    }
-  }, {
-    "new": true
-  }, getSequenceCallback);
+exports.create = function(collection_name, record) {
+	console.log("CREATE :: Creating records for " + collection_name + "where data = " + JSON.stringify(record))
+	return new Promise(function(resolve, reject){
+		var collection, getSequenceCallback;
+	  if (!db) {
+	  	console.log("ERROR: Database not found")
+	  	return reject();
+	  }
+	  collection = getCollection(db, collection_name);
+	  if (!collection) {
+	  	console.log("ERROR: Collection not found")
+	  	return reject();
+	  }
+	  getSequenceCallback = function(err, result) {
+	    if (err) {
+	    	console.log("ERROR: while Creating record")
+	      return reject(err);
+	    }
+	    record.id = result.value.sequence_value;
+	    return collection.insert(record, function(err, result) {
+	      if(err){
+	      	console.log("ERROR: while Creating record");
+	      	return reject(err);
+	      }else{
+	      	console.log("SUCCESS: Record Created");
+	      	return resolve(result);
+	      }
+	    });
+	  };
+	  return collection.findAndModify({
+	    id: collection_name
+	  }, [['id', 1]], {
+	    $inc: {
+	      sequence_value: 1
+	    }
+	  }, {
+	    "new": true
+	  }, getSequenceCallback);
+	})
 };
 
-exports.remove = function(collection_name, query, callback) {
-  var collection;
-  if (!db) {
-    return callback(Err.status(112));
-  }
-  if (!query) {
-    return calback(Err.status(114));
-  }
-  collection = getCollection(db, collection_name);
-  if (!collection) {
-    return callback(Err.status(113));
-  }
-  return collection.insert(query, function(err, result) {
-    return callback(err, result);
-  });
+exports.remove = function(collection_name, query) {
+	return new Promise(function(reject, resolve){
+		 var collection;
+	  if (!db) {
+	  	console.log("ERROR: Database not found")
+	  	return reject();
+	  }
+	  if (!query) {
+	    console.log("ERROR: Query not found")
+	  	return reject();
+	  }
+	  console.log("DELETE :: Removing records for " + collection_name + "where query = " + JSON.stringify(query))
+	  collection = getCollection(db, collection_name);
+	  if (!collection) {
+	    console.log("ERROR: Collection not found")
+	  	return reject();
+	  }
+	  return collection.insert(query, function(err, result) {
+	    if(err){
+	  		console.log("ERROR: while finding record")
+	  		return reject(err);
+	  	}else{
+	  		console.log("SUCCESS: Record found = " + JSON.stringify(result));
+	  		return resolve(result);
+	  	}
+  	});
+	});
 };
 
-exports.find = function(collection_name, query, hidden_fields, callback) {
-  var collection;
-  if (query == null) {
-    query = {};
-  }
-  if (!db) {
-    return callback(Err.status(112));
-  }
-  collection = getCollection(db, collection_name);
-  if (!collection) {
-    return callback(Err.status(113));
-  }
-  return collection.find(query, hidden_fields).toArray(function(err, result) {
-    return callback(err, result);
-  });
+
+exports.find = function(collection_name, query, hidden_fields) {
+	console.log("QUERY :: Finding records for " + collection_name + "where query = " + JSON.stringify(query));
+	return new Promise(function(resolve, reject){
+		var collection;
+	  if (query == null) {
+	    query = {};
+	  }
+	  if (!db) {
+	  	console.log("ERROR: Database not found")
+	  	return reject();
+	  }
+	  collection = getCollection(db, collection_name);
+	  if (!collection) {
+	  	console.log("ERROR: Collection not found")
+	  	return reject();
+	  }
+	  return collection.find(query, hidden_fields).toArray(function(err, result) {
+	  	if(err){
+	  		console.log("ERROR: while finding record")
+	  		return reject(err);
+	  	}else{
+	  		console.log("SUCCESS: Record found = " + JSON.stringify(result));
+	  		return resolve(result);
+	  	}
+	  });
+	})
 };
 
-exports.update = function(collection_name, query, updated_object, callback) {
-  var collection;
-  if (!db) {
-    return callback(Err.status(112));
-  }
-  if (!query) {
-    return calback(Err.status(115));
-  }
-  collection = getCollection(db, collection_name);
-  if (!collection) {
-    return callback(Err.status(113));
-  }
-  return collection.update(query, updated_object, function(err, result) {
-    return callback(err, result);
-  });
+exports.update = function(collection_name, query, updated_object) {
+	return new Promise(function(resolve, reject){
+		var collection;
+	  if (!db) {
+	  	console.log("ERROR: Database not found")
+	  	return reject();
+	  }
+	  if (!query) {
+	    console.log("ERROR: Query not found")
+	  	return reject();
+	  }
+	  console.log("QUERY :: Updating records for " + collection_name + "where query = " + JSON.stringify(query));
+	  collection = getCollection(db, collection_name);
+	  if (!collection) {
+	  	console.log("ERROR: Collection not found")
+	  	return reject();
+	  }
+	  return collection.update(query, updated_object, function(err, result) {
+	    if(err){
+	  		console.log("ERROR: while finding record")
+	  		return reject(err);
+	  	}else{
+	  		console.log("SUCCESS: Record found = " + JSON.stringify(result));
+	  		return resolve(result);
+	  	}
+	  });
+	});
 };

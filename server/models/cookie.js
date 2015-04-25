@@ -48,13 +48,22 @@ var getNewRecord = function(data) {
   return record;
 };
 
-exports.create = function(data, callback) {
-  var user_record, valid;
-  if ((valid = validate(data)).error) {
-    return callback(Err.status(110, 409, valid.message));
-  }
-  user_record = getNewRecord(data);
-  return Mongo.create(collection, user_record, callback);
+exports.create = function(data) {
+	return new Promise(function(resolve,reject){
+		var user_record, valid;
+	  if ((valid = validate(data)).error) {
+	  	return reject(Err.status(110, 409, valid.message));
+	  }
+	  user_record = getNewRecord(data);
+	  var success = function(result){
+	  	return resolve(result);
+	  };
+	  var failed = function(err){
+	  	return reject(err);
+	  };
+	  return Mongo.create(collection, user_record)
+	  .then(success, failed);
+	});
 };
 
 exports.remove = function(query, callback) {
@@ -65,9 +74,18 @@ exports.remove = function(query, callback) {
   }, callback);
 };
 
-exports.find = function(query, callback) {
-  if (query === null) {
+exports.find = function(query) {
+	return new Promise(function(resolve,reject){
+		if (query === null) {
     query = {};
-  }
-  return Mongo.find(collection, query, hidden_fields, callback);
+  	}
+  	var success = function(result){
+  		return resolve(result)
+  	};
+  	var fail = function(err){
+  		return reject(err);
+  	}
+  	return Mongo.find(collection, query, hidden_fields)
+  	.then(success,fail);
+	});
 };

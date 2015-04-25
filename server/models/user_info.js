@@ -4,6 +4,7 @@ Mongo = require('../helpers/mongo');
 User = require('../models/user');
 Err = require('../helpers/error_handler');
 collection = 'UsersInfo';
+var Promise = require('promise');
 
 model = function() {
   return {
@@ -75,15 +76,22 @@ validate = function(data) {
 };
 
 exports.isValidUsername = function(username, callback) {
-  var onValidation;
-  onValidation = function(err, result) {
-    console.log("valid username");
-    console.log(result);
-    return callback(err, result);
-  };
-  return Mongo.find(collection, {
-    username: username
-  }, hidden_fields, onValidation);
+	return new Promise(function(resolve,reject){
+		var validUsername = function(result){
+			console.log("SUCCESS :: Valid Username");
+	  	if(result.length === 0){
+	  		return reject();	
+	  	}else{
+	  		return resolve(result);	
+	  	}
+		};
+		var invalidUsername = function(err){
+			console.log("ERROR :: Invalid Username");
+			return reject();	
+		};
+	  return Mongo.find(collection, {username: username}, hidden_fields)
+	  .then(validUsername,invalidUsername)
+	});
 };
 
 exports.isValidEmail = function(email, callback) {
