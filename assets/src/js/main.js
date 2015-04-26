@@ -4,11 +4,11 @@ var DefaultRoute = Router.DefaultRoute;
 var Route = Router.Route;
 var Link = Router.Link;
 var RouteHandler = Router.RouteHandler;
-var Login = require('./components/login');
-var Users = require('./components/users');
-var ShowUser = require('./components/show_user');
-var Signup = require('./components/signup');
-var EditUser = require('./components/edit_user');
+var Login = require('./components/login/login');
+var Users = require('./components/admin/users');
+var ShowUser = require('./components/admin/show_user');
+var Signup = require('./components/signup/signup');
+var EditUser = require('./components/admin/edit_user');
 var LoginStore = require('./stores/login-store');
 var LoginAction = require('./actions/login-action');
 

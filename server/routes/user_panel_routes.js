@@ -5,10 +5,10 @@ router = express.Router();
 
 var React         = require('react')
 var path          = require("path");
-var SignUp  = require('../../assets/dist/js/components/signup')
-var Login  = require('../../assets/dist/js/components/login')
-var Users  = require('../../assets/dist/js/components/users')
-var ShowUser  = require('../../assets/dist/js/components/show_user')
+var SignUp  = require('../../assets/dist/js/components/signup/signup')
+var Login  = require('../../assets/dist/js/components/login/login')
+var Users  = require('../../assets/dist/js/components/admin/users')
+var ShowUser  = require('../../assets/dist/js/components/admin/show_user')
 
 router.get('/', function(req, res, next) {
   if(req.authenticated){

@@ -55,28 +55,40 @@ body {
 
 
 /*Sign up css*/
-.signup-success-message{
+.signup-success-msg{
   display: none;
 }
-.signup-success .signup-success-message{
+
+.signup-success form{
+  display: none;
+}
+
+.signup-success .signup-success-msg{
   display: block;
+  font-size: 16px;
+  color: green;
 }
-.signup-success #signupForm{
+
+.loading{
   display: none;
 }
 
-.show-user .loader{
+.loader .loading{
+  position: fixed;
+  display: block;
+  z-index: 12;
+  background: url("http://www.adobe.com/business/calculator/VIP/image/loader.gif") 0;
+  height: 100px;
+  width: 100px;
+  background-size: contain;
+  left: 45%;
+  top: 45%;
+}
+.error-msg{
   display: none;
 }
-
-.show-user.loading .table{
-  display: none;
-}
-
-#edit-user .loader{
-  display: none;
-}
-
-#edit-user.loading form{
-  display: none;
+.error .error-msg{
+  display: block;
+  font-size: 16px;
+  color: red;
 }

@@ -1,11 +1,14 @@
 var React = require('react');
 var LoginForm = require('./login_form');
-var LoginStore = require('../stores/login-store');
+var LoginStore = require('../../stores/login-store');
 var Router = require('react-router')
 
 function getLoginState() {
   return {
-     authenticated: LoginStore.isAuthenticated(),
+    authenticated       : LoginStore.isAuthenticated(),
+    loginAwaited        : LoginStore.loginInProcess(),
+    loginStatus         : LoginStore.loginStatus(),
+    totalLoginReqMade   : LoginStore.totalLoginReqMade(),
   };
 }
 var self = this;
@@ -28,7 +31,7 @@ module.exports = React.createClass({
     },
     render: function() {
         return ( 
-            < LoginForm id = "loginForm" authenticated={this.state.authenticated}/> 
+            < LoginForm id = "loginForm" parentState={this.state}/> 
         );
     },
     _onChange: function() {

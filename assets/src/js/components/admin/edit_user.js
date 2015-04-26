@@ -1,9 +1,9 @@
 var React = require('react');
-var UserActions = require('../actions/user-action');
-var UserStore = require('../stores/user-store');
-var InputField = require('./input_field');
-var InputButton = require('./button');
-var Checkbox = require('./checkbox');
+var UserActions = require('../../actions/user-action');
+var UserStore = require('../../stores/user-store');
+var InputField = require('../common/input_field');
+var InputButton = require('../common/button');
+var Checkbox = require('../common/checkbox');
 
 function getUserState(id) {
   return {

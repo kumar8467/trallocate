@@ -1,7 +1,7 @@
 var React = require('react');
 var UserListContainer = require('./user_list_container');
-var UserStore = require('../stores/user-store');
-var UserActions = require('../actions/user-action');
+var UserStore = require('../../stores/user-store');
+var UserActions = require('../../actions/user-action');
 var Router = require('react-router')
 
 function getUserState() {

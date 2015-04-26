@@ -1,5 +1,5 @@
 var React = require('react');
-var UserActions = require('../actions/user-action');
+var UserActions = require('../../actions/user-action');
 var Router = require('react-router')
 var Link = Router.Link;
 var RouteHandler = Router.RouteHandler;

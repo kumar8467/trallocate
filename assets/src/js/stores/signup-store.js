@@ -5,35 +5,43 @@ var request = require('superagent');
 var assign = require('object-assign');
 
 var CHANGE_EVENT = 'change';
-var _signup = {
-  authentication_awaited: false,
-  signup_error: false,
+var model = {
+  signupAwaited   : false,
+  signupStatus    : false,
+  requestCount    : 0
 };
 
-var createUser = function(data){
+var signup_request = function(data){
+  model.signupAwaited = true;
+  model.requestCount += 1;
   request
   .post('http://localhost:3000/api/v1/signup')
   .send(data)
   .set('Accept', 'application/json')
   .end(function(err, res){
     if(err){
-      _signup.signup_error = true;
-      _signup.authentication_awaited = true;
+      model.signupStatus = false;
     }else{
-      _signup.authentication_awaited = true;
-      _signup.signup_error = false;
+      model.signupStatus = true;
     }
+    model.signupAwaited = false;
     SignupStore.emitChange();
   });
 };
 
 SignupStore = assign({}, EventEmitter.prototype, {
-  emailSent: function(){
-    return _signup.authentication_awaited;
+  signupStatus: function(){
+    return model.signupStatus;
   },
-  signupError: function(){
-    return _signup.signup_error;
+
+  signupInProgress: function(){
+    return model.signupAwaited;
   },
+
+  totalReqMade: function(){
+    return model.requestCount;
+  },
+
   emitChange: function() {
     this.emit(CHANGE_EVENT);
   },
@@ -52,25 +60,7 @@ SignupDispatcher.register(function(action) {
 
   switch(action.actionType) {
     case SignupConstants.SIGNUP:
-      createUser(action.data);
-      break;
-
-    case SignupConstants.LOGIN_SUCCESS:
-      SignupStore.emitChange();
-      break;
-
-    case SignupConstants.LOGIN_FAIL:
-      // update(action.id, {complete: false});
-      SignupStore.emitChange();
-      break;
-
-    case SignupConstants.LOGIN_AFTER:
-      // update(action.id, {complete: false});
-      SignupStore.emitChange();
-      break;
-
-    case SignupConstants.LOGOUT:
-      // update(action.id, {complete: false});
+      signup_request(action.data);
       SignupStore.emitChange();
       break;
 

@@ -1,12 +1,13 @@
 var React = require('react');
 var SignupForm = require('./signup_form');
-var SignupStore = require('../stores/signup-store');
+var SignupStore = require('../../stores/signup-store');
 var Router = require('react-router')
 
 var getLoginState = function() {
   return {
-    authentication_awaited: SignupStore.emailSent(),
-    error: SignupStore.signupError()
+    signupStatus    : SignupStore.signupStatus(),
+    signupAwaited   : SignupStore.signupInProgress(),
+    totalReqMade    : SignupStore.totalReqMade(),
   };
 }
 var self = this;
@@ -26,7 +27,7 @@ module.exports = React.createClass({
     },
     render: function() {
         return (
-            < SignupForm id = "signupForm" authentication_awaited={this.state.authentication_awaited} error={this.state.error}/>
+            < SignupForm id = "signupForm" parentState={this.state}/>
         );
     },
     _onChange: function() {

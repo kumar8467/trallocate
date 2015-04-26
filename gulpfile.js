@@ -11,7 +11,7 @@ gulp.task('browserify', function() {
 });
 
 gulp.task('react', function () {    
-  gulp.src('assets/src/js/components/*.js')
+  gulp.src('assets/src/js/components/**/*.js')
     .pipe(react({harmony: true}))
     .pipe(gulp.dest('assets/dist/js/components/'));
 });

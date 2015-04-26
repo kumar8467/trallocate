@@ -1,7 +1,7 @@
 var React = require('react');
-var InputField = require('./input_field');
-var InputButton = require('./button');
-var SignupActions = require('../actions/signup-action');
+var InputField = require('../common/input_field');
+var InputButton = require('../common/button');
+var SignupActions = require('../../actions/signup-action');
 
 
 module.exports =  React.createClass({
@@ -14,12 +14,22 @@ module.exports =  React.createClass({
     SignupActions.signup(data);
   },
   render:function(){
+    parentState = this.props.parentState
+    parentClass = "container "
+    if(parentState.signupAwaited){
+      parentClass += "loader"
+    }else if(parentState.totalReqMade && parentState.signupStatus){
+      parentClass += "signup-success"
+    }else if(parentState.totalReqMade && !parentState.signupStatus){
+      parentClass += "error"
+    }
     return (
-      <div className="container">
+      <div className={parentClass}>
+        <div className="loading"></div>
         <div className="page-header">
           <h3>Sign up</h3>
         </div>
-        <div className={this.props.authentication_awaited ? "col-sm-8 col-sm-offset-2 signup-form signup-success" : "col-sm-8 col-sm-offset-2 signup-form"} >
+        <div className="col-sm-8 col-sm-offset-2 signup-form">
           <form className={this.props.className} id={this.props.id} onSubmit={this._onClick}>
             <div className={"form-group"}>
               <label className={"control-label"}>Username</label>
@@ -35,6 +45,7 @@ module.exports =  React.createClass({
             </div>
             <InputButton id="login-btn" className={"btn btn-primary"} value="Submit" value="Sign up" />
           </form>
+          <div className="error-msg">Username or Email id already registered</div>
           <div className="col-sm-8 col-sm-offset-2 signup-success-msg">
             "Thanks for sign up. Email has been send to you for verification."
           </div>

@@ -7,78 +7,137 @@ var assign = require('object-assign');
 var CHANGE_EVENT = 'change';
 var LOGOUT_EVENT = 'logout';
 var authenticateUser, LoginStore;
-var _admin_user = {
-  authenticated: false,
-  data: {},
-  authentication_awaited: true
+var model = {
+  authenticated     : false,
+  authAwaited       : false,
+  authStatus        : false, // check for request sucess or failed
+  authRequestCount  : 0,
+  loginAwaited      : false,
+  loginStatus       : false, // check for request sucess or failed
+  loginRequestCount : 0,
+  user_data         : {},
 };
 
-var login_user = function(data){
-  _admin_user.authentication_awaited = false;
+var login_request = function(data){
+  model.loginAwaited = true;
+  model.loginRequestCount += 1;
   request
   .post('http://localhost:3000/api/v1/signin')
   .send(data)
   .set('Accept', 'application/json')
   .end(function(err, res){
     if(res.status == 200){
-      _admin_user.authenticated = true;
-      _admin_user.data = JSON.parse(res.text);
-      _admin_user.authentication_awaited = false;
+      try{
+        model.authenticated = true;
+        model.loginStatus = true;
+        model.user_data = JSON.parse(res.text);
+      }catch(e){
+        console.log("ERROR: parsing data")
+      }
+    }else{
+      model.authenticated = false;
+      model.loginStatus = false;
     }
+    model.loginAwaited = false;
     LoginStore.emitChange();
   });
+  LoginStore.emitChange();
 };
 
-var data = function(data){
+var authenticate_request = function(data){
+  model.authAwaited = true;
+  model.authRequestCount += 1;
   request
   .get('http://localhost:3000/api/v1/user-data')
   .set('Accept', 'application/json')
   .end(function(err, res){
     if(res.status == 200){
-      var response =  JSON.parse(res.text);
-      _admin_user.authenticated = response.session
-      _admin_user.authentication_awaited = false;
+      try{
+        var response =  JSON.parse(res.text);
+        model.authenticated = response.session
+        model.authStatus = true;
+        model.user_data = response.user_data
+      }catch(e){
+        console.log("ERROR: parsing data")
+      }
     }else{
-      _admin_user.authentication_awaited = false;
-      _admin_user.authenticated = false;
+      model.authStatus = false;
+      model.authenticated = false;
     }
+    model.authAwaited = false;
     LoginStore.emitChange();
   });
 };
 
-var logout = function(){
+var logout_request = function(){
   document.cookie = 'cookieName=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-  _admin_user.authenticated = false
-  _admin_user.data = {}
-  _admin_user.authentication_awaited = true
+  var model = {
+    authenticated     : false,
+    authAwaited       : false,
+    authStatus        : false, // check for request sucess or failed
+    authRequestCount  : 0,
+    loginAwaited      : false,
+    loginStatus       : false, // check for request sucess or failed
+    loginRequestCount : 0,
+    user_data         : {},
+  };
 }
 
 LoginStore = assign({}, EventEmitter.prototype, {
   isAuthenticated: function(){
-    return _admin_user.authenticated;
+    return model.authenticated;
   },
+
+  loginStatus: function(){
+    return model.loginStatus;
+  },
+
+  loginInProcess: function(){
+    return model.loginAwaited;
+  },
+
+  totalLoginReqMade: function(){
+    return model.loginRequestCount;
+  },
+
+  authStatus: function(){
+    return model.authStatus;
+  },
+
   authInProcess: function(){
-    return _admin_user.authentication_awaited;
+    return model.authAwaited;
   },
+
+  totalAuthReqMade: function(){
+    return model.authRequestCount;
+  },
+
   setAuthentication: function(bool){
-    _admin_user.authenticated = bool
+    return model.authenticated = bool
   },
+
+  getUserInfo: function(){
+    return model.user_data
+  },
+
   emitChange: function() {
     this.emit(CHANGE_EVENT);
   },
-  emitLogoutChange: function() {
-    this.emit(LOGOUT_EVENT);
-  },
+
   addChangeListener: function(callback) {
     this.on(CHANGE_EVENT, callback);
   },
 
-  addLogoutListener: function(callback) {
-    this.on(LOGOUT_EVENT, callback);
-  },
-
   removeChangeListener: function(callback) {
     this.removeListener(CHANGE_EVENT, callback);
+  },
+
+  emitLogoutChange: function() {
+    this.emit(LOGOUT_EVENT);
+  },
+
+  addLogoutListener: function(callback) {
+    this.on(LOGOUT_EVENT, callback);
   },
 
   removeLogoutListener: function(callback) {
@@ -86,30 +145,23 @@ LoginStore = assign({}, EventEmitter.prototype, {
   }
 });
 
+
 LoginDispatcher.register(function(action) {
   var text;
 
   switch(action.actionType) {
     case LoginConstants.LOGIN:
-      login_user(action.data);
-      break;
-
-    case LoginConstants.AUTHENTICATE:
-      data();
-      break;
-
-    case LoginConstants.LOGIN_FAIL:
-      // update(action.id, {complete: false});
+      login_request(action.data);
       LoginStore.emitChange();
       break;
 
-    case LoginConstants.LOGIN_AFTER:
-      // update(action.id, {complete: false});
+    case LoginConstants.AUTHENTICATE:
+      authenticate_request();
       LoginStore.emitChange();
       break;
 
     case LoginConstants.LOGOUT:
-      logout()
+      logout_request()
       LoginStore.emitLogoutChange();
       break;
 

@@ -1,6 +1,6 @@
 var React = require('react');
-var UserActions = require('../actions/user-action');
-var UserStore = require('../stores/user-store');
+var UserActions = require('../../actions/user-action');
+var UserStore = require('../../stores/user-store');
 
 function getUserState(id) {
   return {
