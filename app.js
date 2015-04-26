@@ -30,23 +30,31 @@ app.use(express.static(path.join(__dirname, 'assets/dist')));
 
 app.use(function(req, res, next) {
     var cookieName = req.cookies.cookieName;
+    console.log("Cookie send :: " + cookieName)
     var success = function(result){
-    	if(result.length){
-    		console.log("SUCCESS:: Cookie found");
+    	if(result){
+    		console.log("SUCCESS:: User Data");
             req.authenticated = true;
+            req.user_data = result;
         }else{
-        	console.log("SUCCESS:: Cookie not found");
+        	console.log("ERROR:: Cookie not found");
             req.authenticated = false;
         }
         next();
     };
     var failed = function(){
-    	console.log("SUCCESS:: Cookie not found");
+    	console.log("ERROR:: Cookie not found");
     	req.authenticated = false;
     	next();
     };
-    Cookies.find({cookieName: cookieName, sequence_value: null})
-    .then(success, failed);
+    if(cookieName){
+        Cookies.get(cookieName)
+        .then(success, failed);
+    }else{
+        console.log("MESSAGE :: Cookie Empty");
+        req.authenticated = false;
+        next();
+    }
 });
 
 app.all('*', function(req, res, next) {

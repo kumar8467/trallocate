@@ -9,13 +9,15 @@ var Users = require('./components/admin/users');
 var ShowUser = require('./components/admin/show_user');
 var Signup = require('./components/signup/signup');
 var EditUser = require('./components/admin/edit_user');
+var Dashboard = require('./components/dashboard/dashboard');
 var LoginStore = require('./stores/login-store');
 var LoginAction = require('./actions/login-action');
 
 var getLoginState = function(){
   return { 
-    authenticated: LoginStore.isAuthenticated(),
-    authInProcess: LoginStore.authInProcess()
+    authenticated : LoginStore.isAuthenticated(),
+    authInProcess : LoginStore.authInProcess(),
+    isAdmin       : LoginStore.isAdmin()
   };
 }
 var App = React.createClass({
@@ -50,7 +52,9 @@ var App = React.createClass({
     var panel = [];
     if(!this.state.authInProcess){
       if(this.state.authenticated){
-        panel.push(<li><Link to="users">Users</Link></li>)
+        panel.push(<li><Link to={"dashboard"}>Dashboard</Link></li>)
+        if(this.state.isAdmin)
+          panel.push(<li><Link to={"users"}>Users</Link></li>)
         panel.push(<li><a class="" href="" onClick={this._onLogoutClick}>Logout</a></li>)
       }else{
         panel.push(<li><Link to="login">Login</Link></li>)
@@ -97,11 +101,12 @@ var App = React.createClass({
 
 var routes = (
   <Route name="app" path="/" handler={App}>
-    <Route name="login" handler={Login} />
+    <Route name="login" path="/login" handler={Login} />
     <Route name="users" path="/users" handler={Users} />
       <Route name="showUser" path="users/:userId" handler={ShowUser} />
       <Route name="editUser" path="users/:userId/edit" handler={EditUser} />
     <Route name="signup" handler={Signup} />
+    <Route name="dashboard" path="/dashboard" handler={Dashboard} />
   </Route>
 );
 

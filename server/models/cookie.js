@@ -6,7 +6,8 @@ var Promise = require('promise');
 
 var model = function() {
   return {
-    cookieName: ''
+    cookieName: '',
+    createdAt : Date.now().toString()
   };
 };
 
@@ -18,53 +19,83 @@ hidden_fields = {
   _id: 0
 };
 
-var validate = function(data) {
-  var i, len, required_field;
-  if (!data) {
-    return {
-      error: true,
-      message: 'Cookie Validation :: data not present'
-    };
-  }
-  for (i = 0, len = required_fields.length; i < len; i++) {
-    required_field = required_fields[i];
-    if (!data[required_field]) {
-      return {
-        error: true,
-        message: 'Cookie Validation :: ' + required_field + ' abscent'
-      };
+var find = function(query) {
+  return new Promise(function(resolve,reject){
+    if (query === null) {
+      query = {};
     }
-  }
-  return {
-    error: false,
-    message: null
-  };
+    var success = function(result){
+      return resolve(result)
+    };
+    var failed = function(err){
+      return reject(err);
+    }
+    return Mongo.find(collection, query, hidden_fields)
+    .then(success,failed);
+  });
 };
 
-
-var getNewRecord = function(data) {
-  var record;
-  record = model();
-  record.cookieName = data.cookieName;
-  return record;
+var create = function(data) {
+  return new Promise(function(resolve,reject){
+    var success = function(result){
+      return resolve(result);
+    };
+    var failed = function(err){
+      return reject(err);
+    };
+    return Mongo.create(collection, data)
+    .then(success, failed);
+  });
 };
 
-exports.create = function(data) {
-	return new Promise(function(resolve,reject){
-		var user_record, valid;
-	  if ((valid = validate(data)).error) {
-	  	return reject(Err.status(110, 409, valid.message));
-	  }
-	  user_record = getNewRecord(data);
-	  var success = function(result){
-	  	return resolve(result);
-	  };
-	  var failed = function(err){
-	  	return reject(err);
-	  };
-	  return Mongo.create(collection, user_record)
-	  .then(success, failed);
-	});
+exports.set = function(user_data){
+  return new Promise(function(resolve,reject){
+    if(!user_data){
+      console.log("ERROR :: No data provided while setting cookie")
+      return reject();
+    }
+    var record = model();
+    user_data = JSON.stringify(user_data);
+    console.log("Create:: Creating cookie for user data = " + user_data)
+    record.cookieName = Crypt.encrypt(user_data, record.createdAt);
+    var success = function(result){
+      return resolve(record.cookieName)
+    };
+
+    var failed = function(error){
+      return reject(error)
+    };
+    create(record).
+    then(success,failed);
+  })
+};
+
+exports.get = function(cookie){
+  console.log("Extracting user data from cookie :: " + cookie)
+  return new Promise(function(resolve,reject){
+    var success = function(result){
+      if(result && result.length){
+        try{
+          var key = result[0].createdAt;
+          var userData = Crypt.decrypt(cookie, key);
+          console.log("User extracted :: " + userData);
+          userData = JSON.parse(userData);
+          return resolve(userData);
+        }catch(err){
+          return reject(err)
+        }
+      }else{
+        console.log("Cookie Expired")
+        return reject()
+      }
+    };
+
+    var failed = function(error){
+      return reject(error)
+    };
+    find({cookieName : cookie})
+    .then(success,failed)
+  })
 };
 
 exports.remove = function(query) {
@@ -77,21 +108,5 @@ exports.remove = function(query) {
 		}
 		return Mongo.update(collection, query, {$set: {active: false}})
 		.then(success, fail)
-	});
-};
-
-exports.find = function(query) {
-	return new Promise(function(resolve,reject){
-		if (query === null) {
-    query = {};
-  	}
-  	var success = function(result){
-  		return resolve(result)
-  	};
-  	var failed = function(err){
-  		return reject(err);
-  	}
-  	return Mongo.find(collection, query, hidden_fields)
-  	.then(success,failed);
 	});
 };

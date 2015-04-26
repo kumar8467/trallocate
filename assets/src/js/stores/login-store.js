@@ -56,7 +56,7 @@ var authenticate_request = function(data){
         var response =  JSON.parse(res.text);
         model.authenticated = response.session
         model.authStatus = true;
-        model.user_data = response.user_data
+        model.user_data = response.user_data;
       }catch(e){
         console.log("ERROR: parsing data")
       }
@@ -118,6 +118,10 @@ LoginStore = assign({}, EventEmitter.prototype, {
 
   getUserInfo: function(){
     return model.user_data
+  },
+
+  isAdmin: function(){
+    return !!(model.user_data && model.user_data.admin)
   },
 
   emitChange: function() {

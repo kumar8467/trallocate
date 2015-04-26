@@ -21,12 +21,13 @@ create a object with name path domain expiry time
 exports.user_data = function(req, res, next){
   var responsed = {}
   if(req.authenticated){
-    var response = {session: true};
+    var response = {session: true, user_data: req.user_data};
   }else{
-    response = {session: false};
+    response = {session: false, user_data: {}};
   }
   res.end(JSON.stringify(response))
 }
+
 exports.init = function(req, res, next) {
   console.log(req.body);
   var userdata = {};
@@ -45,8 +46,8 @@ exports.init = function(req, res, next) {
     var authPasswordSuccess = function(result){
       var decrypt_password = Crypt.decrypt(result[0].password, result[0].createdAt);
       if(decrypt_password == req.body.password){
-        console.log("SUCCESS :: Password Matched")
-        return Cookie.create({cookieName: cookie});
+        console.log("SUCCESS :: Password Matched");
+        return Cookie.set(userdata);
       }else{
         console.log("ERROR :: Password Mismatching")
         return authFail(Err.status(403));
@@ -54,11 +55,12 @@ exports.init = function(req, res, next) {
     }
     var setCookieSuccess = function(result){
       console.log("SUCCESS :: Cookie saved to database")
-      res.cookie('cookieName',cookie , { maxAge: 900000, httpOnly: false});
+      console.log("######## saved data = " + result);
+      res.cookie('cookieName',result , { maxAge: 900000, httpOnly: false});
       return res.end(JSON.stringify(userdata));
     };
     var authFailResponse = function(err){
-      console.log("ERROR :: Error in signup process")
+      console.log("ERROR :: Error in login process")
       return next(err);
     };
 

@@ -9,6 +9,7 @@ function getLoginState() {
     loginAwaited        : LoginStore.loginInProcess(),
     loginStatus         : LoginStore.loginStatus(),
     totalLoginReqMade   : LoginStore.totalLoginReqMade(),
+    isAdmin             : LoginStore.isAdmin()
   };
 }
 var self = this;
@@ -18,8 +19,10 @@ module.exports = React.createClass({
     },
     getInitialState: function() {
         var state = getLoginState()
-        if(state.authenticated)
+        if(state.authenticated && state.isAdmin)
             this.context.router.transitionTo('/users')
+        else if(state.authenticated)
+            this.context.router.transitionTo('/dashboard')
         return state
     },
     componentDidMount: function() {
@@ -36,8 +39,10 @@ module.exports = React.createClass({
     },
     _onChange: function() {
         login_state = getLoginState();
-        if(login_state && login_state.authenticated){
+        if(login_state && login_state.authenticated &&  login_state.isAdmin){
             this.context.router.transitionTo('/users');
+        }else if(login_state && login_state.authenticated){
+            this.context.router.transitionTo('/dashboard');
         }else{
             this.setState(login_state);
         }
