@@ -36,7 +36,6 @@ var App = React.createClass({
   },
   _onLogout: function(){
     document.cookie = "";
-    this.context.router.transitionTo('/login')
     this.setState(getLoginState());
   },
   componentDidMount: function() {
@@ -55,7 +54,7 @@ var App = React.createClass({
         panel.push(<li><Link to={"dashboard"}>Dashboard</Link></li>)
         if(this.state.isAdmin)
           panel.push(<li><Link to={"users"}>Users</Link></li>)
-        panel.push(<li><a class="" href="" onClick={this._onLogoutClick}>Logout</a></li>)
+        panel.push(<li onClick={this._onLogoutClick}><Link to={"login"}>Logout</Link></li>)
       }else{
         panel.push(<li><Link to="login">Login</Link></li>)
         panel.push(<li><Link to="signup">Signup</Link></li>)

@@ -71,7 +71,7 @@ var authenticate_request = function(data){
 
 var logout_request = function(){
   document.cookie = 'cookieName=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-  var model = {
+  model = {
     authenticated     : false,
     authAwaited       : false,
     authStatus        : false, // check for request sucess or failed
