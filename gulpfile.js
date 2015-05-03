@@ -3,13 +3,6 @@ var browserify = require('gulp-browserify');
 var concat = require('gulp-concat');
 var react = require('gulp-react');
 
-gulp.task('browserify', function() {
-    gulp.src('assets/src/js/main.js')
-      .pipe(browserify({transform: 'reactify'}))
-      .pipe(concat('main.js'))
-      .pipe(gulp.dest('assets/dist/js'));
-});
-
 gulp.task('react', function () {    
   gulp.src('assets/src/js/components/**/*.js')
     .pipe(react({harmony: true}))
@@ -29,6 +22,13 @@ gulp.task('copy', function() {
       .pipe(gulp.dest('assets/dist/js/dispatchers/'));
     gulp.src('assets/src/styles/*.css')
       .pipe(gulp.dest('assets/dist/styles'));
+});
+
+gulp.task('browserify', function() {
+    gulp.src('assets/src/js/main.js')
+      .pipe(browserify({transform: 'reactify'}))
+      .pipe(concat('main.js'))
+      .pipe(gulp.dest('assets/dist/js'));
 });
 
 gulp.task('watch', function() {
