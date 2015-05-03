@@ -16,42 +16,18 @@ GoogleStrategy = require('passport-google').Strategy;
 FacebookStrategy = require('passport-facebook').Strategy;
 
 passport.use(new GoogleStrategy({
-    returnURL: 'http://localhost:3000/auth/google/return',
-    realm: 'http://localhost:3000/'
-  },
-  function(identifier, profile, done) {
-    //create user account
-    //User.findOrCreate({ openId: identifier }, function(err, user) {
-    //  done(err, user);
-    //});
-  }
+   returnURL: 'http://trallocate.com/auth/google/return',
+   realm: 'http://trallocate.com/'
+ },
+ function(identifier, profile, done) {
+   //create user account
+   //User.findOrCreate({ openId: identifier }, function(err, user) {
+   //  done(err, user);
+   //});
+ }
 ));
 
 router.get('/auth/google', passport.authenticate('google'));
-
-passport.use(new FacebookStrategy({
-    clientID: FACEBOOK_APP_ID,
-    clientSecret: FACEBOOK_APP_SECRET,
-    callbackURL: "http://www.example.com/auth/facebook/callback"
-  },
-  function(accessToken, refreshToken, profile, done) {
-    //create user account
-    //User.findOrCreate(..., function(err, user) {
-    //  if (err) { return done(err); }
-    //  done(null, user);
-    //});
-  }
-));
-
-router.get('/auth/facebook', passport.authenticate('facebook'));
-
-router.get('/auth/facebook/callback',
-  passport.authenticate('facebook', { successRedirect: '/',
-    failureRedirect: '/login' }));
-
-router.get('/auth/google/return',
-  passport.authenticate('google', { successRedirect: '/users',
-    failureRedirect: '/login' }));
 
 router.get('/', function (req, res, next) {
   if (req.authenticated && req.user_data) {
